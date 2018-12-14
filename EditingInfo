@@ -1,4 +1,5 @@
-1)CREATE TABLE SalesLT.ProductTMP_564120   (
+1)
+CREATE TABLE SalesLT.ProductTMP_564   (
     ProductID int IDENTITY(1,1) NOT NULL,
     Name nvarchar(255) NOT NULL,
     ProductNumber nvarchar(25) NOT NULL,
@@ -10,24 +11,24 @@
     ProductCategoryID int NULL
 )
 
-2)INSERT INTO SalesLT.ProductTMP_564120 (Name,ProductNumber,Color,StandardCost,ListPrice,Size,Weight,ProductCategoryID)
+2)INSERT INTO SalesLT.ProductTMP_564 (Name,ProductNumber,Color,StandardCost,ListPrice,Size,Weight,ProductCategoryID)
 SELECT Name,ProductNumber,Color,StandardCost,ListPrice,Size,Weight,ProductCategoryID
 FROM SalesLT.Product
 
-3)CREATE TABLE SalesLT.ColorTMP_564120   (
+3)CREATE TABLE SalesLT.ColorTMP_564   (
     ColorID int IDENTITY(1,1) NOT NULL,
     NameColor nvarchar(25) NOT NULL,
 )
 
 
-4)INSERT INTO SalesLT.ColorTMP_564120 (NameColor)
+4)INSERT INTO SalesLT.ColorTMP_564 (NameColor)
 SELECT Color
 FROM SalesLT.Product
 WHERE Color IS NOT NULL
 
-5)ALTER TABLE SalesLT.ProductTMP_564120 ADD ColorID int
+5)ALTER TABLE SalesLT.ProductTMP_564 ADD ColorID int
 
 
 6)UPDATE SalesLT.ProductTMP_564120
 SET ColorID = table2.ColorID
-FROM SalesLT.ColorTMP_564120 as table2
+FROM SalesLT.ColorTMP_564 as table2
