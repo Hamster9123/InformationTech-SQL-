@@ -2,20 +2,20 @@
 WITH MaxSale
 AS
 (
-    select top 1 *
-    from SalesLT.SalesOrderHeader
-    order by SalesLT.SalesOrderHeader.TotalDue desc
+    SELECT TOP 1 *
+    FROM SalesLT.SalesOrderHeader a
+    ORDER BY a.TotalDue DESC
 )
-select * from MaxSale
+SELECT * FROM MaxSale
 GO
 
 2.
-DECLARE @somevar as INT;
-SET @somevar = (select top 1 [SalesOrderHeader].[SalesOrderID]
-                from SalesLT.SalesOrderHeader
-                order by SalesLT.SalesOrderHeader.TotalDue desc
+DECLARE @svar as INT;
+SET @svar = (SELECT TOP 1 a.SalesOrderID
+                FROM SalesLT.SalesOrderHeader a
+                ORDER BY a.TotalDue DESC
                 )
-SELECT @somevar
+SELECT @svar
 
 3.
 WITH  SalesReport
@@ -23,27 +23,25 @@ AS
 (
     Select b.DueDate, b.CustomerID
     From SalesLT.SalesOrderHeader b
-    UNION
+)
     SELECT  a.City,  sum(s.TotalDue) AS Total_Sum
-    FROM SalesLT.SalesOrderHeader s inner join SalesLt.Address a
+    FROM  SalesReport s inner join  SalesLt.Address a
         ON(s.BillToAddressID=a.AddressID)
     GROUP BY a.City, s.TotalDue
-)
 
 SELECT * FROM SalesReport;
 
-
 4.
-CREATE PROCEDURE SalesLT_000 
+CREATE PROCEDURE SalesLT_002  
      @DueDate_2 DATE, @DueDate_3 DATE
  AS
  BEGIN
     SELECT a.ShipMethod, a.PurchaseOrderNumber, a.DueDate, a.TotalDue
     FROM SalesLT.SalesOrderHeader a
     WHERE TotalDue IN(SELECT max(b.TotalDue) FROM SalesLT.SalesOrderHeader b) and 
-  DueDate BETWEEN  @DueDate_2 and @DueDate_3
+	DueDate BETWEEN  @DueDate_2 and @DueDate_3
     GROUP BY a.ShipMethod, a.PurchaseOrderNumber, a.DueDate, a.TotalDue
  END
 
  EXEC SalesLT_002 @DueDate_2 = '2000-01-01', @DueDate_3 = '2018-12-31';  
-GO
+GO 
