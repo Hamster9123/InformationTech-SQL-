@@ -34,13 +34,16 @@ SELECT * FROM SalesReport;
 
 
 4.
-CREATE PROCEDURE SalesLT_GGG  
+CREATE PROCEDURE SalesLT_000 
      @DueDate_2 DATE, @DueDate_3 DATE
  AS
  BEGIN
     SELECT a.ShipMethod, a.PurchaseOrderNumber, a.DueDate, a.TotalDue
     FROM SalesLT.SalesOrderHeader a
-    WHERE DueDate BETWEEN DueDate_2 and DueDate_3 and TotalDue IN(SELECT max(b.TotalDue)
-    FROM SalesLT.SalesOrderHeader b)
+    WHERE TotalDue IN(SELECT max(b.TotalDue) FROM SalesLT.SalesOrderHeader b) and 
+  DueDate BETWEEN  @DueDate_2 and @DueDate_3
     GROUP BY a.ShipMethod, a.PurchaseOrderNumber, a.DueDate, a.TotalDue
  END
+
+ EXEC SalesLT_002 @DueDate_2 = '2000-01-01', @DueDate_3 = '2018-12-31';  
+GO
