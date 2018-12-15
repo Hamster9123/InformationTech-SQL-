@@ -29,6 +29,6 @@ WHERE Color IS NOT NULL
 5)ALTER TABLE SalesLT.ProductTMP_564 ADD ColorID int
 
 
-6)UPDATE SalesLT.ProductTMP_564120
+6)UPDATE SalesLT.ProductTMP_564
 SET ColorID = table2.ColorID
 FROM SalesLT.ColorTMP_564 as table2
