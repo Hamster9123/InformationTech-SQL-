@@ -1,4 +1,5 @@
-1)WITH MaxSale
+1.
+WITH MaxSale
 AS
 (
     SELECT TOP 1 *
@@ -8,9 +9,7 @@ AS
 SELECT * FROM MaxSale
 GO
 
-
-
-2)
+2.
 DECLARE @svar as INT;
 SET @svar = (SELECT TOP 1 a.SalesOrderID
                 FROM SalesLT.SalesOrderHeader a
@@ -18,9 +17,7 @@ SET @svar = (SELECT TOP 1 a.SalesOrderID
                 )
 SELECT @svar
 
-
-
-3) 
+3.
 WITH DateSeries(d,b)
 AS (
 SELECT CAST('2012-01-01' AS DATE), EOMONTH(CAST('2012-01-01' AS DATE))
@@ -35,7 +32,8 @@ WHERE c.OrderDate BETWEEN a.d and a.b
 GROUP BY e.City,a.d,a.b
 
 
-4)CREATE PROCEDURE SalesLT_002  
+4.
+CREATE PROCEDURE SalesLT_564  
      @DueDate_2 DATE, @DueDate_3 DATE
  AS
  BEGIN
