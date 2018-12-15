@@ -1,5 +1,81 @@
+1)
+CREATE FUNCTION dbo.DayToWord_564(@day int)
+  RETURNS NVARCHAR(100)
+      AS
+  BEGIN
+        DECLARE @str NVARCHAR(100)
+        DECLARE @lastNumberOfDay INT
+        SET @lastNumberOfDay = @day % 10
+        SET @str=
+            CASE WHEN @day >= 10 AND @day <= 20 THEN CAST(@day as varchar(10)) + N' Днів'
+                 WHEN @lastNumberOfDay = 1 THEN CAST(@day as varchar(10)) + N' День'
+                 WHEN (@lastNumberOfDay BETWEEN 1 AND 4) THEN CAST(@day as varchar(10)) + N' Дні'
+                 WHEN (@lastNumberOfDay > 4 OR @lastNumberOfDay = 0 OR @day = 0) THEN CAST(@day as varchar(10)) + N' Днів'
+        ELSE ''
+  END
+  RETURN @str
+END
+GO
+CREATE FUNCTION dbo.MouthToWord_564(@mounth int)
+  RETURNS NVARCHAR(100)
+      AS
+  BEGIN
+       DECLARE @str NVARCHAR(100)
+        DECLARE @lastNumberOfDay INT
+        SET @lastNumberOfDay = @mounth % 10
+        SET @str=
+            CASE WHEN @lastNumberOfDay = 1 THEN CAST(@mounth as varchar(10)) + N' Місяць'
+                 WHEN (@lastNumberOfDay BETWEEN 1 AND 4) THEN CAST(@mounth as varchar(10)) + N' Місяці'
+                 WHEN (@lastNumberOfDay > 4 OR @lastNumberOfDay = 0 OR (@mounth >= 10 AND @mounth <= 12)) THEN CAST(@mounth as varchar(10)) + N' Місяців'
+        ELSE ''
+  END
+  RETURN @str
+END
+GO
+CREATE FUNCTION dbo.YearToWord_564(@year int)
+  RETURNS NVARCHAR(100)
+      AS
+  BEGIN
+       DECLARE @str NVARCHAR(100)
+        DECLARE @lastNumberOfDay INT
+        SET @lastNumberOfDay = @year % 10
+        SET @str=
+            CASE WHEN @lastNumberOfDay = 1 THEN CAST(@year as varchar(10)) + N' Рік'
+                 WHEN (@lastNumberOfDay BETWEEN 1 AND 4) THEN CAST(@year as varchar(10)) + N' Роки'
+                 WHEN (@lastNumberOfDay > 4 OR @lastNumberOfDay = 0 OR (@year >= 10 AND @year <= 20)) THEN CAST(@year as varchar(10)) + N' Років'
+        ELSE ''
+  END
+  RETURN @str
+END
+GO
+
+CREATE FUNCTION dbo.DateToWords_564(@dateFirst date, @dateSecond date)
+  RETURNS NVARCHAR(100)
+      AS
+  BEGIN
+        DECLARE @str NVARCHAR(300)
+        DECLARE @dateDifDays INT
+        DECLARE @yearsCount INT
+        DECLARE @mounthCount INT
+        DECLARE @daysCount INT
+        SET @dateDifDays = DATEDIFF(day,@dateFirst,@dateSecond);
+        SET @yearsCount = @dateDifDays/365
+        SET @mounthCount = (@dateDifDays-(@yearsCount*365))/31
+        SET @daysCount = @dateDifDays - (@mounthCount*31) - (@yearsCount*365)
+
+        SET @str=dbo.YearToWord_564(@yearsCount) +' '+ dbo.MouthToWord_564(@mounthCount) + ' ' + dbo.DayToWord_564(@daysCount);
+       
+  RETURN @str
+END
+GO
+
+SELECT dbo.DateToWords_564('2002-05-04','2008-10-14');
+GO
+
+
+
 2)
-CREATE FUNCTION dbo.Numb_at_word
+CREATE FUNCTION dbo.Numb_to_word
 	(
 		@dt int
 	)
@@ -117,13 +193,17 @@ CREATE FUNCTION dbo.Numb_at_word
 	END
 
 
-Select dbo.Numb_at_word(20)
+
+
+Select dbo.Numb_to_word(20)
+
+
 
 
 3)
 
 CREATE FUNCTION 
-	Employees.Salary2(@date DATE, @date2 DATE, @ide int)
+	Employees.getSalary564(@date DATE, @date2 DATE, @ide int)
 RETURNS TABLE
 AS 
 RETURN 
@@ -132,4 +212,60 @@ RETURN
 	WHERE emp_no = @ide and from_date = @date and to_date = @date2
 
 
-Select* FROM Employees.Salary2('1997-06-26','1998-06-26','10434')
+Select* FROM Employees.getSalary564('1997-06-26','1998-06-26','10434')
+
+
+
+
+4)
+
+CREATE FUNCTION dbo.Function_564 (@date DATE)
+   RETURNS TABLE
+    AS
+   RETURN 
+   (
+        WITH DateSeries(d,b)
+        AS (
+            SELECT @date as d, EOMONTH(@date) as b
+            UNION ALL
+            SELECT DATEADD(mm, 1, d), EOMONTH(DATEADD(mm,1,b))
+                FROM DateSeries
+                WHERE d<DATEADD(mm, -1, DATEADD(yy, 1, @date))
+        )
+        SELECT a.d AS DATE_START, a.b AS DATE_END, h.CITY, SUM(c.TotalDue) AS SUM
+            FROM DateSeries a, SalesLT.SalesOrderHeader c
+            INNER JOIN SalesLT.Address h ON c.BillToAddressID=h.AddressID
+            WHERE c.OrderDate BETWEEN a.d AND a.b
+            GROUP BY a.d, a.b, h.City
+   )
+GO
+select * from dbo.Function_564(CAST('2012-01-01' AS DATE))
+GO
+
+
+5)
+DECLARE Generate_SubTotal_564 CURSOR FOR 
+    SELECT SLT_SOH.SalesOrderID
+    FROM SalesLT.SalesOrderHeader as SLT_SOH
+OPEN Generate_SubTotal_564; 
+DECLARE @SOH_ID INT
+    FETCH NEXT FROM Generate_SubTotal_564 INTO @SOH_ID; 
+WHILE @@FETCH_STATUS = 0 
+    BEGIN 
+        DECLARE @sumOfLineTotals MONEY;
+        SET @sumOfLineTotals = (SELECT SUM(LineTotal)
+                from SalesLT.SalesOrderDetail 
+                where SalesOrderID = @SOH_ID)
+    
+        UPDATE SalesLT.SalesOrderHeader 
+            SET SubTotal = 
+                CASE WHEN @sumOfLineTotals IS NULL THEN 0
+                    WHEN @sumOfLineTotals IS NOT NULL THEN @sumOfLineTotals
+                END
+            WHERE SalesOrderID = @SOH_ID
+        PRINT @sumOfLineTotals;
+        FETCH NEXT FROM Generate_SubTotal_564 INTO @SOH_ID
+    END; 
+CLOSE Generate_SubTotal_564; 
+DEALLOCATE Generate_SubTotal_564;
+GO
