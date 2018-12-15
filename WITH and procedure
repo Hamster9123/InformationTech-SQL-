@@ -1,5 +1,4 @@
-1.
-WITH MaxSale
+1)WITH MaxSale
 AS
 (
     SELECT TOP 1 *
@@ -9,7 +8,9 @@ AS
 SELECT * FROM MaxSale
 GO
 
-2.
+
+
+2)
 DECLARE @svar as INT;
 SET @svar = (SELECT TOP 1 a.SalesOrderID
                 FROM SalesLT.SalesOrderHeader a
@@ -17,22 +18,24 @@ SET @svar = (SELECT TOP 1 a.SalesOrderID
                 )
 SELECT @svar
 
-3.
-WITH  SalesReport
-AS
-(
-    Select b.DueDate, b.CustomerID
-    From SalesLT.SalesOrderHeader b
+
+
+3) 
+WITH DateSeries(d,b)
+AS (
+SELECT CAST('2012-01-01' AS DATE), EOMONTH(CAST('2012-01-01' AS DATE))
+UNION ALL
+SELECT DATEADD(mm, 1, d), EOMONTH(DATEADD(mm, 1, b))
+FROM DateSeries
+WHERE d<DATEADD(mm, -1, DATEADD(yy, 1, CAST('2012-01-01' AS DATE)))
 )
-    SELECT  a.City,  sum(s.TotalDue) AS Total_Sum
-    FROM  SalesReport s inner join  SalesLt.Address a
-        ON(s.BillToAddressID=a.AddressID)
-    GROUP BY a.City, s.TotalDue
+SELECT e.City,a.d,a.b, SUM(c.TotalDue) as Summ
+FROM DateSeries a, SalesLT.SalesOrderHeader c INNER JOIN SalesLT.Address e ON c.BillToAddressID=e.AddressID
+WHERE c.OrderDate BETWEEN a.d and a.b
+GROUP BY e.City,a.d,a.b
 
-SELECT * FROM SalesReport;
 
-4.
-CREATE PROCEDURE SalesLT_002  
+4)CREATE PROCEDURE SalesLT_002  
      @DueDate_2 DATE, @DueDate_3 DATE
  AS
  BEGIN
